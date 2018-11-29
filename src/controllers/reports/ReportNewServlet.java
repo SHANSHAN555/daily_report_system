@@ -14,7 +14,7 @@ import models.Report;
 /**
  * Servlet implementation class ReportNewServlet
  */
-@WebServlet("/report/new")
+@WebServlet("/reports/new")
 public class ReportNewServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -36,7 +36,7 @@ public class ReportNewServlet extends HttpServlet {
 		r.setReport_date(new Date(System.currentTimeMillis()));
 		request.setAttribute("report",r);
 
-		RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/report/new.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/reports/new.jsp");
 		        rd.forward(request, response);
 	}
 

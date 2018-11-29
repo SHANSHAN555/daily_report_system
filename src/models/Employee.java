@@ -24,7 +24,7 @@ import javax.persistence.Table;
             query = "select count(e) from Employee as e where e.code = :code"
             ),
     @NamedQuery(
-            name = "checkloginCodeAndPassword",
+            name = "checkLoginCodeAndPassword",
             query = "select e from Employee as e where e.delete_flag = 0 And e.code = :code And e.password = :pass"
             )
 })

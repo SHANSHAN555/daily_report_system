@@ -47,47 +47,43 @@ public class LoginServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    Boolean check_result = false;
+		Boolean check_result = false;
+		String code = request.getParameter("code");
+		String plain_pass = request.getParameter("password");
 
-        String code = request.getParameter("code");
-        String plain_pass = request.getParameter("password");
+		Employee e = null;
 
-        Employee e = null;
+		if(code != null && !code.equals("") && plain_pass != null && !plain_pass.equals("")){
+		    EntityManager em = DBUtil.createEntityManager();
 
-        if(code != null && !code.equals("") && plain_pass != null && !plain_pass.equals("")) {
-            EntityManager em = DBUtil.createEntityManager();
+		    String password = EncryptUtil.getPasswordEncrypt(
+		            plain_pass,
+		            (String)this.getServletContext().getAttribute("salt")
+		            );
+		    try{
+		        e=em.createNamedQuery("checkLoginCodeAndPassword", Employee.class)
+		                .setParameter("code", code)
+		                .setParameter("pass", password)
+		                .getSingleResult();
+		    }catch(NoResultException ex){}
+		    em.close();
+		    if(e != null){
+		        check_result = true;
+		    }
+		}
 
-            String password = EncryptUtil.getPasswordEncrypt(
-                    plain_pass,
-                    (String)this.getServletContext().getAttribute("salt")
-                    );
+		if(!check_result){
+		    request.setAttribute("_token", request.getSession().getId());
+		    request.setAttribute("hasError", true);
+		    request.setAttribute("code", code);
 
-            try {
-                e = em.createNamedQuery("checkLoginCodeAndPassword", Employee.class)
-                      .setParameter("code", code)
-                      .setParameter("pass", password)
-                      .getSingleResult();
-            } catch(NoResultException ex) {}
-
-            em.close();
-
-            if(e != null) {
-                check_result = true;
-            }
-        }
-
-        if(!check_result) {
-            request.setAttribute("_token", request.getSession().getId());
-            request.setAttribute("hasError", true);
-            request.setAttribute("code", code);
-
-            RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/login/login.jsp");
-            rd.forward(request, response);
-        } else {
-            request.getSession().setAttribute("login_employee", e);
-
-            request.getSession().setAttribute("flush", "ログインしました。");
-            response.sendRedirect(request.getContextPath() + "/");
-        }
+		    RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/login/login.jsp");
+		    rd.forward(request, response);
+		}else{
+		    request.getSession().setAttribute("login_employee", e);
+		    request.getSession().setAttribute("flush", "ログインしました。");
+		    response.sendRedirect(request.getContextPath() + "/");
+		}
 	}
+
 }
